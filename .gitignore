@@ -1,0 +1,9 @@
+# Local Python environment and generated Python files
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local database and migration backups (keep local data out of source hand-ins)
+data/*.db
+data/*.db-*
+

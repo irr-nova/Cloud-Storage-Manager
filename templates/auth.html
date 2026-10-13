@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Create account' if mode == 'signup' else 'Sign in' }}{% endblock %}
+{% block body %}
+<main class="auth-layout">
+  <section class="auth-art">
+    <a class="brand brand-light" href="{{ url_for('login') }}"><span class="brand-mark">✳</span> cloudvault</a>
+    <div class="art-copy"><div class="eyebrow">YOUR FILES, IN THEIR ELEMENT</div><h1>A calmer place<br>for everything.</h1><p>Organize your cloud files and keep storage usage within your plan.</p><div class="orbit"><div class="orbit-ring"></div><div class="orbit-core">✳</div><span class="float-card c1">▧ &nbsp; Project brief.pdf</span><span class="float-card c2">▤ &nbsp; Brand assets.zip</span><span class="float-card c3">◫ &nbsp; Your cloud · 68%</span></div></div>
+    <div class="art-foot">PRIVATE BY DESIGN <span>·</span> ALWAYS WITH YOU</div>
+  </section>
+  <section class="auth-panel"><div class="auth-card">
+    <div class="mobile-brand"><span class="brand-mark">✳</span> cloudvault</div>
+    <div class="eyebrow">{{ 'GET STARTED' if mode == 'signup' else 'WELCOME BACK' }}</div>
+    <h2>{{ 'Create your cloud space.' if mode == 'signup' else 'Good to see you.' }}</h2>
+    <p class="muted">{{ 'Choose a plan, then organize files in your own folders.' if mode == 'signup' else 'Sign in to manage your files and folders.' }}</p>
+    <form method="post" class="auth-form">
+      {% if mode == 'signup' %}<label>Full name<input name="full_name" maxlength="100" placeholder="e.g. Aisha Kumar" autocomplete="name" required></label>{% endif %}
+      <label>Email address<input name="email" type="email" maxlength="100" placeholder="you@example.com" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" minlength="8" placeholder="{{ 'At least 8 characters' if mode == 'signup' else 'Your password' }}" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" required></label>
+      {% if mode == 'signup' %}<label>Storage plan<select name="plan_id" required>{% for plan in plans %}<option value="{{ plan['plan_id'] }}">{{ plan['plan_name'] }} · {{ plan['storage_limit_mb']|mb }} MB · ₹{{ plan['monthly_price']|int }}/month</option>{% endfor %}</select></label>{% endif %}
+      <button class="button primary wide" type="submit">{{ 'Create account' if mode == 'signup' else 'Sign in' }} <span>→</span></button>
+    </form>
+    {% if mode == 'login' %}<div class="demo-accounts"><strong>Demo accounts</strong><span>aarav@example.com · cloud123</span><span>priya@example.com · secure123</span><span>admin@example.com · team1234</span></div>{% endif %}
+    <div class="auth-switch">{{ 'Already have an account?' if mode == 'signup' else 'New to CloudVault?' }} <a href="{{ url_for('login' if mode == 'signup' else 'signup') }}">{{ 'Sign in' if mode == 'signup' else 'Create an account' }}</a></div>
+    <div class="auth-note"><span>◇</span> Your account and storage records are saved in the local database.</div>
+  </div></section>
+</main>
+{% endblock %}

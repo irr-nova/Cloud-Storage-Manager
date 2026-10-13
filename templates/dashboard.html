@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}My files{% endblock %}
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">✳</span> cloudvault</a>
+    <div class="side-label">WORKSPACE</div>
+    <a class="nav-link active" href="{{ url_for('dashboard') }}">▦ &nbsp; My files</a>
+    <div class="side-label folder-label">FOLDERS <button type="button" class="small-add" onclick="document.getElementById('new-folder').scrollIntoView({behavior:'smooth'})">＋</button></div>
+    <nav class="folder-list">
+      <a class="folder-link" href="{{ url_for('dashboard') }}">◫ &nbsp; All files</a>
+      {% for folder in folders %}<a class="folder-link" href="{{ url_for('dashboard', folder=folder['folder_id']) }}">▱ &nbsp; {{ folder['folder_name'] }}</a>{% endfor %}
+    </nav>
+    <div class="side-storage"><div class="storage-top"><span>{{ g.user['plan_name'] }} plan</span><span>{{ used|mb }} / {{ quota|mb }} MB</span></div><div class="progress"><span style="width:{{ usage_percent }}%"></span></div><div class="storage-tip">{{ usage_percent }}% used · ₹{{ g.user['monthly_price']|int }}/month</div></div>
+    <div class="sidebar-bottom"><div class="avatar">{{ g.user['full_name'][0]|upper }}</div><div class="account-info"><strong>{{ g.user['full_name'] }}</strong><span>{{ g.user['email'] }}</span></div><form action="{{ url_for('logout') }}" method="post"><button class="logout" type="submit">↪ <span>Sign out</span></button></form></div>
+  </aside>
+  <main class="main-content">
+    <header class="topbar"><div><div class="breadcrumb">Workspace <span>/</span> <b>My files</b></div><div class="greeting">Your files, <em>in focus.</em></div></div><form class="search" method="get"><span>⌕</span><input name="q" value="{{ query }}" placeholder="Search your files..."><button class="search-submit" type="submit">Search</button></form></header>
+    <section class="welcome-banner"><div class="banner-copy"><div class="eyebrow">{{ g.user['plan_name']|upper }} CLOUD PLAN</div><h1>Room for what<br>you’re working on.</h1><p>Organize your files into folders and track your plan storage.</p><a href="#add-file" class="text-link">Add a file record ↓</a></div><div class="banner-art"><div class="banner-circle"></div><div class="folder-back"></div><div class="folder-front"><span class="folder-spark">✳</span></div><div class="mini-file mf1">▧</div><div class="mini-file mf2">▤</div></div></section>
+    <section class="files-section"><div class="section-heading"><div><div class="eyebrow">YOUR LIBRARY</div><h2>{{ 'Search results' if query else 'All files' }} <span>{{ files|length }}</span></h2></div><a class="button primary" href="#add-file">＋ Add file record</a></div>
+      <div class="file-table"><div class="table-head"><span>NAME</span><span>FOLDER</span><span>TYPE</span><span>SIZE</span><span></span></div>
+      {% for file in files %}<div class="file-row"><div class="file-name"><span class="file-icon">▤</span><div><strong>{{ file['file_name'] }}</strong><small>Private to you</small></div></div><span class="file-type folder-cell">{{ file['folder_name'] }}</span><span class="file-type">{{ file['file_type'] or 'FILE' }}</span><span class="file-size">{{ file['file_size_mb']|mb }} MB</span><div class="file-actions"><form action="{{ url_for('delete_file', file_id=file['file_id']) }}" method="post" onsubmit="return confirm('Delete this file record?')"><button title="Delete">×</button></form></div></div>
+      {% else %}<div class="empty-state"><div class="empty-icon">▱</div><h3>{{ 'No matching files' if query else 'Your space is ready' }}</h3><p>{{ 'Try another search.' if query else 'Add a file record below to get started.' }}</p></div>{% endfor %}</div>
+      <div class="table-foot"><span>{{ files|length }} file record(s)</span><span>{{ used|mb }} MB used · {{ quota|mb }} MB available</span></div>
+    </section>
+    <section class="manage-grid">
+      <form id="add-file" class="manage-card" action="{{ url_for('add_file') }}" method="post"><div class="eyebrow">INSERT FILE RECORD</div><h3>Add a file record</h3><p>This schema stores file metadata and size, not the file contents.</p><label>File name<input name="file_name" maxlength="255" placeholder="e.g. Assignment.pdf" required></label><div class="form-row"><label>Type<input name="file_type" maxlength="50" placeholder="PDF"></label><label>Size (MB)<input name="file_size_mb" type="number" min="0" step="0.001" placeholder="2.500" required></label></div><label>Folder<select name="folder_id" required>{% for folder in folders %}<option value="{{ folder['folder_id'] }}">{{ folder['folder_name'] }}</option>{% endfor %}</select></label><button class="button primary" type="submit">Save file record</button></form>
+      <form id="new-folder" class="manage-card" action="{{ url_for('create_folder') }}" method="post"><div class="eyebrow">INSERT FOLDER</div><h3>Create a folder</h3><p>Folder names must be unique in your account.</p><label>Folder name<input name="folder_name" maxlength="100" placeholder="e.g. Lab Work" required></label><button class="button secondary" type="submit">＋ Create folder</button></form>
+      <form class="manage-card delete-folder-card" action="{{ url_for('delete_folder') }}" method="post" onsubmit="return confirm('Delete this folder? It must be empty first.')"><div class="eyebrow">REMOVE EMPTY FOLDER</div><h3>Delete a folder</h3><p>Folders with file records must be emptied first.</p><label>Folder<select name="folder_id" required>{% for folder in folders %}<option value="{{ folder['folder_id'] }}">{{ folder['folder_name'] }}</option>{% endfor %}</select></label><button class="button danger-button" type="submit">Delete empty folder</button></form>
+    </section>
+    <details class="danger-zone"><summary>Delete account</summary><div class="danger-content"><h3>Permanently remove your account?</h3><p>This deletes your account, folders, and file records from the local database. This cannot be undone.</p><form action="{{ url_for('delete_account') }}" method="post" onsubmit="return confirm('This permanently deletes your account and all its records. Continue?')"><label>Password<input type="password" name="password" autocomplete="current-password" required></label><label>Type DELETE to confirm<input name="confirmation" autocomplete="off" required></label><button class="button danger-button" type="submit">Delete my account</button></form></div></details>
+    <footer class="footer"><span>✳ CLOUDVAULT · LOCAL SQLITE DATABASE</span><span>YOUR FILES, YOUR SPACE.</span></footer>
+  </main>
+</div>
+{% endblock %}
